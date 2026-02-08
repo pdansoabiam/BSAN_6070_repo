@@ -1,4 +1,23 @@
-CA02 Improved Naive Bayes Email Spam Classifier
+CA02_ML 
+
+Weaknesses of the current code and why they matter
+2.1 Efficiency and scalability issues
+a)	Inefficient dictionary lookup: For every word token, the code loops through the entire 3000-word dictionary to find a match (nested loops). This is much slower than using a hash map (Python dict) for O(1) lookup.
+b)	Repeated counting: words.count(word) is called inside a loop over words, making counting O(n^2) per email line. A Counter over the words would count once in O(n).
+c)	Dense matrix: features_matrix is a dense NumPy array. Bag-of-words data is usually sparse; dense matrices waste memory and slow computations for large corpora.
+2.2 Data quality and modeling issues
+a)	Only the 3rd line is used (if i == 2). This likely ignores most of the email content and can reduce model accuracy. If the dataset format is inconsistent, it can also cause unstable behavior.
+b)	No text normalization: tokens are not lowercased, so 'Free' and 'free' become separate features. No stopword removal, stemming/lemmatization, or punctuation handling beyond isalpha().
+c)	No handling of encoding errors: open(mail) without encoding may fail on some systems/emails. Email datasets often contain mixed encodings.
+d)	Dictionary cleaning is limited: isalpha() removes URLs/numbers, but spam signals often include numeric patterns, currency symbols, and hyperlinks. Removing them may discard predictive information.
+2.3 Reproducibility and robustness issues
+a)	File order is not guaranteed: os.listdir() order can vary. This can change row ordering and make debugging/comparison harder. Sorting file names improves reproducibility.
+b)	Platform-dependent path parsing: using fil.split('/') assumes UNIX separators. On Windows, backslashes can break label extraction. Use os.path.basename(fil) or pathlib.Path(fil).name.
+c)	Labeling depends only on filename prefix. If file naming conventions change, labels break silently.
+
+
+
+Improved Naive Bayes Email Spam Classifier
 
 This repository contains an improved design and implementation of an email spam classifier using the Naive Bayes supervised learning algorithm.
 The implementation addresses efficiency, scalability, robustness, and reproducibility weaknesses present in the original starter code, while preserving the original assignment intent and framework.
